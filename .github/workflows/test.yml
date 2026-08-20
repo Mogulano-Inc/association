@@ -10,3 +10,5 @@ jobs:
             repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }} \
             --jq '.author_association')
           echo "association is $association"
+        env:
+          GH_TOKEN: ${{ github.token }}
