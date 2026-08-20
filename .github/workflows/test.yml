@@ -5,10 +5,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: |
+      - name: Get commenter association
+        id: association
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash -l {0}
+        run: |
           association=$(gh api \
             repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }} \
             --jq '.author_association')
-          echo "association is $association"
+  
+          echo "association=$association" >> $GITHUB_OUTPUT
+  
+      - name: Fail if user is not authorized
+        if: |
+          !contains(fromJSON('["OWNER","COLLABORATOR","MEMBER"]'), steps.association.outputs.association)
+        shell: bash -l {0}
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions --raw-field 'content=-1'
+          echo "User not authorized to update snapshots"
+          exit 1
         env:
           GH_TOKEN: ${{ github.token }}
