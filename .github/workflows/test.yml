@@ -1,0 +1,12 @@
+on: issue_comment
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: |
+          association=$(gh api \
+            repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }} \
+            --jq '.author_association')
+          echo "association is $association"
